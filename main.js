@@ -77,35 +77,41 @@ function generateTable(targetData)
         }
     }
 }
-
+function copyArray(arr){
+    return JSON.parse(JSON.stringify(arr));
+}
 function generatePath(target){// generate all childs of parent
     let childs = [];
-    console.log("Target"+ target);
-    let changedTarget = target;
-    console.log("Changed target"+ changedTarget);
+
+    console.log("gen start, Target: "+ target+" Target length: "+ target.length);
+    let changedTarget = copyArray(target);
     let answerDict = null;
+    let place = 0;
     for(let i=0;i<target.length;i++)
     {
         answerDict= processNumber(target[i]);
-        console.log("Dictionary"+ answerDict.changed);
-        if(answerDict.changed==true)
+        //console.log("Dictionary: string changed: "+ answerDict.changed+" at i= "+i);
+        if(answerDict.changed == true)
         {
             changedTarget[i]=answerDict.targetNumber;
+            //console.log("Change at place "+i+" to: "+ changedTarget[i]);
             checkString(changedTarget);
-            childs.push(changedTarget);
-            changedTarget = [];
-            console.log(childs);
+            childs.push(copyArray(changedTarget));
+            changedTarget=copyArray(target);
+            answerDict.changed == false;
         }
-        return childs;
     }
+    console.log("gen.end");
+    return childs;
 }
 
 function addChilds(target){
     let childs = generatePath(target.value);
-    console.log("Childs: "+childs);
+    //console.log(childs);
     for(let child in childs)
     {
-        let node=new TreeNode(child);
+        //console.log(childs[child],"on addChilds");
+        let node=new TreeNode(childs[child]);
         target.childs.push(node);
     }
 
@@ -114,24 +120,32 @@ function addChilds(target){
 function generateTree(target){// generate tree
     //[10,10,10,11,11]
     const root = new TreeNode(target);
-    console.log(root.valLength);
     let childs = null;
     let currentTarget = root;
     console.log("valLength", currentTarget.valLength);
     console.log("minStringSize", gameStatus.minStringSize);
+    addChilds(currentTarget);
     for(let i=0;i<root.value.length;i++)
     {
-        addChilds(currentTarget);
-        while(currentTarget.valLength>gameStatus.minStringSize)
+        
+
+    /*for(let child in root.childs)
         {
-          console.log('Krisjanis labakais')
+            console.log(root.childs[child], "Onroot");
+        }
+        
+        while(currentTarget.length>gameStatus.minStringSize)
+        {
+            console.log('Now at generate Tree');
+
             for(let child in currentTarget.childs)
             {
+                console.log("Now in for child loop",child);
                 addChilds(currentTarget);
+                currentTarget=currentTarget.child;
             }
           console.log('before assignment', currentTarget.child)
-            currentTarget=currentTarget.child;
-        }
+        }*/
     }
     return root;
 
@@ -176,7 +190,7 @@ function processNumber(targetNumber)
       maxDivider:1,
       changed:false
     };
-    if(targetNumber%2==0)
+    if(targetNumber % 2 == 0)
     {
         answer.changed = true;
         if(targetNumber==2){
@@ -238,7 +252,7 @@ function validateString(tString, targets){
     if(isInvalid){
         let breakPoint = randomIntFromInterval(1,tString.length-2);
         tString[0]+=tString[breakPoint];
-        tString.splice[breakPoint,1];
+        tString.splice[breakPoint,2];
     }
     
 }
