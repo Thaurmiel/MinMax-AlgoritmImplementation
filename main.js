@@ -7,7 +7,7 @@ const buttonAI = document.getElementById("buttonAI");
 const buttonPlayer = document.getElementById("buttonPlayer");
 const buttonStart = document.getElementById("gameStart");
 const buttonTrOne = document.getElementById("bstateOne");
-const buttonDeleTable = document.getElementById("bdelTable");
+const buttonDeleteTable = document.getElementById("bdelTable");
 
 const tableMain = document.getElementById("tableGame");
 
@@ -19,6 +19,22 @@ let textState2 = document.getElementById("stateTwo");
 let textState3 = document.getElementById("stateThree");
 let textState4 = document.getElementById("stateFour");
 
+let gameStatus = {
+    gameString : generateString(),
+    pointsAI : 0,
+    pointsPlayer : 0,
+    turnStart : "AI",
+    currentTurn : "",
+    gameStarted : false,
+    minStringSize: 3
+}
+
+buttonTrOne.addEventListener("click",checkString);
+buttonDeleteTable.addEventListener("click", deleteTable);
+buttonAI.addEventListener("click", clickedAI);
+buttonPlayer.addEventListener("click", clickedPlayer);
+buttonStart.addEventListener("click", clickedStart);
+
 
 function changeText (targetID, textString){
     document.getElementById(targetID).innerHTML = textString;
@@ -28,7 +44,7 @@ function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
   }
 
-function createString(){
+function generateString(){
   let returnString =[];
   for(let i=0;i<10;i++)
   {
@@ -37,13 +53,98 @@ function createString(){
   return returnString;
 }
 
-let gameStatus = {
-    gameString : createString(),
-    pointsAI : 0,
-    pointsPlayer : 0,
-    turnStart : "AI",
-    gameStarted : false
+function generateTable(targetData)
+{
+    let cols = targetData.length;
+    let rows =2;
+    checkString(gameStatus.gameString);
+    for(let i=0;i<rows;i++)
+    {
+        
+        let row = document.createElement("tr");
+        tableMain.appendChild(row);
+        for (let j=0;j<cols;j++)
+        {
+            let cell = document.createElement("td");
+            row.appendChild(cell);
+            if(i===0){cell.innerHTML=j+1;}
+            else
+            {
+                cell.innerHTML=gameStatus.gameString[j];
+                cell.setAttribute("onclick","numberOnClick(this);");
+                cell.setAttribute("place",j);
+            }
+        }
+    }
 }
+
+function generatePath(target){// generate all childs of parent
+    let childs = [];
+    console.log("Target"+ target);
+    let changedTarget = target;
+    console.log("Changed target"+ changedTarget);
+    let answerDict = null;
+    for(let i=0;i<target.length;i++)
+    {
+        answerDict= processNumber(target[i]);
+        console.log("Dictionary"+ answerDict.changed);
+        if(answerDict.changed==true)
+        {
+            changedTarget[i]=answerDict.targetNumber;
+            checkString(changedTarget);
+            childs.push(changedTarget);
+            changedTarget = [];
+            console.log(childs);
+        }
+        return childs;
+    }
+}
+
+function addChilds(target){
+    let childs = generatePath(target.value);
+    console.log("Childs: "+childs);
+    for(let child in childs)
+    {
+        let node=new TreeNode(child);
+        target.childs.push(node);
+    }
+
+}
+
+function generateTree(target){// generate tree
+    //[10,10,10,11,11]
+    const root = new TreeNode(target);
+    console.log(root.valLength);
+    let childs = null;
+    let currentTarget = root;
+    console.log("valLength", currentTarget.valLength);
+    console.log("minStringSize", gameStatus.minStringSize);
+    for(let i=0;i<root.value.length;i++)
+    {
+        addChilds(currentTarget);
+        while(currentTarget.valLength>gameStatus.minStringSize)
+        {
+          console.log('Krisjanis labakais')
+            for(let child in currentTarget.childs)
+            {
+                addChilds(currentTarget);
+            }
+          console.log('before assignment', currentTarget.child)
+            currentTarget=currentTarget.child;
+        }
+    }
+    return root;
+
+}
+
+function deleteTable(){
+    let target = tableMain;
+    while(target.hasChildNodes())
+    {
+        target.removeChild(target.firstChild);
+    }
+}
+
 
 function clickedAI(){
     gameStatus.turnStart = "AI";
@@ -62,8 +163,9 @@ function clickedPlayer(){
 function clickedStart(){
     gameStatus.gameStarted = true;
     divSettings.hidden = true;
-    
+    gameStatus.currentTurn = gameStatus.turnStart;
 }
+
 function processNumber(targetNumber)
 {
     targetNumber=parseInt(targetNumber);
@@ -71,10 +173,12 @@ function processNumber(targetNumber)
     let answer = 
     {
       targetNumber:targetNumber,
-      maxDivider:1
+      maxDivider:1,
+      changed:false
     };
     if(targetNumber%2==0)
     {
+        answer.changed = true;
         if(targetNumber==2){
           answer.targetNumber=1;
           textState2.innerHTML= answer.maxDivider +" "+answer.targetNumber;
@@ -92,50 +196,32 @@ function processNumber(targetNumber)
 
 
 
-function generate_table( targetData)
+function checkString(target) {
+    
+    let checkTarget = [];
+    for(let i=0;i<target.length;i++)
     {
-    let cols = targetData.length;
-    let rows =2;
-    checkString();
-    for(let i=0;i<rows;i++)
-    {
-        
-        let row = document.createElement("tr");
-        tableMain.appendChild(row);
-        for (let j=0;j<cols;j++)
-        {
-        let cell = document.createElement("td");
-        row.appendChild(cell);
-        if(i===0){cell.innerHTML=j+1;}
-
+        if(target[i]<2){
+            checkTarget.push(1);
+        }
         else
-            {
-            cell.innerHTML=gameStatus.gameString[j];
-            cell.setAttribute("onclick","numberOnClick(this);");
-            cell.setAttribute("place",j);
-            }
+        {
+            checkTarget.push(0);
         }
     }
-    }
-
-function delete_table(){
-    let target = tableMain;
-    while(target.hasChildNodes())
-    {
-        target.removeChild(target.firstChild);
-    }
+    textState1.innerHTML = checkTarget;
+    validateString(target,checkTarget);
 }
 
-buttonTrOne.addEventListener("click",checkString);
-buttonDeleTable.addEventListener("click", delete_table);
-
-buttonAI.addEventListener("click", clickedAI);
-buttonPlayer.addEventListener("click", clickedPlayer);
-buttonStart.addEventListener("click", clickedStart);
-
-function stringValidate(tString, targets){
+function validateString(tString, targets){
+    isInvalid = true;
     for(let i=0;i<tString.length;i++)
     {
+        if(tString[i]%2==0)
+        {
+            isInvalid = false;
+        }
+
         if(targets[i]==1)
         {
             if(i==tString.length-1)
@@ -149,47 +235,88 @@ function stringValidate(tString, targets){
             if(tString[i]==1)
                 tString.splice(i,1);
         }
-}
-
-function checkString() {
-    let target = gameStatus.gameString;
-    let checkTarget = [];
-    for(let i=0;i<target.length;i++)
-    {
-        if(target[i]<2){
-            checkTarget.push(1);
-        }
-        else
-        {
-            checkTarget.push(0);
-        }
+    if(isInvalid){
+        let breakPoint = randomIntFromInterval(1,tString.length-2);
+        tString[0]+=tString[breakPoint];
+        tString.splice[breakPoint,1];
     }
-
     
-    textState1.innerHTML = checkTarget;
-
-    stringValidate(target,checkTarget);
 }
+
+
 
 function numberOnClick(target)
-    {
+{
     let targetNumber = target.innerHTML;
  
     textState3.innerHTML = targetNumber;
     let answerDict = processNumber(targetNumber);
-    target.setAttribute("style","color:red;");
+    //target.setAttribute("style","color:red;");
     gameStatus.gameString[target.getAttribute("place")]=answerDict.targetNumber;
     textState4.innerHTML = gameStatus.gameString;
     target.innerHTML = answerDict.targetNumber;
     if(answerDict.maxDivider==1)
         {   
-            checkString();
-            delete_table();
-            generate_table(gameStatus.gameString);
+            checkString(gameStatus.gameString);
+            deleteTable();
+            generateTable(gameStatus.gameString);
         }
-    
+        changeTurn();
+}
+
+function changeTurn(){
+    gameStatus.currentTurn=="AI"?gameStatus.currentTurn="Player":gameStatus.currentTurn="AI";    
+}
+
+// minimax section
+class TreeNode {
+    constructor(value) {
+        this.value = value;
+        this.childs = [];
+        this.valLength = value.length;
+    }
+    }
+
+function minmax(node, depth, isMax){
+    if (depth==0||!("children" in node)){
+        return node.value;
+    }
+
+    let target_value;
+    let val;
+
+    if(isMax){
+        target_value = Number.NEGATIVE_INFINITY;
+
+        for(let child in node.children)
+        {
+            val = minmax(node.children[child], depth-1, false);
+            target_value = Math.min(val,target_value);
+        }
+        return target_value;
+    }
+    else
+    {
+        target_value = Number.POSITIVE_INFINITY;
+
+        for(let child in node.children)
+        {
+            val = minmax(node.children[child], depth-1, true);
+            target_value = Math.min(val,target_value);
+        }
+        return target_value;
 
     }
+
+}
+// init section
+let tree=null;
+function onstart()
+{
+    generateTable(gameStatus.gameString);
+    tree = generateTree(gameStatus.gameString);
+    console.log(tree);
+}
     
-    generate_table(gameStatus.gameString);
+onstart();
     

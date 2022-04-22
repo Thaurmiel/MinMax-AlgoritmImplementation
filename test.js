@@ -2,7 +2,7 @@ function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
   }
 
-function createString(){
+function generateString(){
   let returnString =[];
   for(let i=0;i<10;i++)
   {
@@ -11,7 +11,7 @@ function createString(){
   return returnString;
 }
 
-let str1 = createString();
+let str1 = generateString();
 
 let target = str1;
 let checkTarget = [];
@@ -63,7 +63,44 @@ function validate(target11, target2)
             target11.splice(i,1);
         }
     }
-    console.log("Target"+target11);
+    console.log("Target "+target11);
 }
 
-validate(target,target1);
+class TreeNode {
+    constructor(value)
+    {
+        this.value = value;
+        this.descendants = [];
+    }
+
+}
+
+
+
+/*
+function generateTree(target){// generate tree
+    //[10,10,10,11,11]
+    const root = new TreeNode(target);
+    console.log("generate tree step");
+    let childs = null;
+    let currentTarget = root;
+    
+    for(let i=0;i<root.value.length;i++)
+    {
+        
+        while(currentTarget.valLength>gameStatus.minStringSize)
+        {
+            for(let child in currentTarget.childs)
+            {
+                addChilds(currentTarget);
+            }
+            console.log(currentTarget.child);
+            currentTarget=currentTarget.child;
+        }
+        console.log("generate end");
+    }
+    return root;
+
+}
+
+*/
