@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Praktiska1</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+
+        <div id="divSettings" class="panel" >
+
+            <p class="panel-heading">Choose who will start</p>
+            <button id="buttonAI" type="button" class="buttonFaded" >AI</button>
+            <button id="buttonPlayer" type="button" class="buttonFaded">Player</button>
+            <br>
+            <p id="firstTurn">AI will be first</p>
+            <button id="gameStart" type="button" class="button" >Start game</button>
+
+        </div>
+
+        <div id="divGame" >
+
+            <p id="playerPoints">Player points: 0</p>
+            <p id="aiPoints">AI points: 0</p>
+
+            <div id="tableDiv">
+                <table class="table" id="tableGame"></table>
+            </div>
+
+        </div>
+
+        <div id="divDebug">
+            <button id="bdelTable" type="button" class="button" >Delete Table</button>
+            <button id="bstateOne" type="button" class="button" >Trigger one</button>
+            <p id="stateOne">1</p>
+            <p>divided by|isInteger?</p>
+            <p id="stateTwo">2</p>
+            <p>Number clicked:</p>
+            <p id="stateThree">3</p>
+            <p>Core string</p>
+            <p id="stateFour">4</p>
+
+        </div>
+
+        
+        <script src="main.js"></script>
+    </body>
+</html>
