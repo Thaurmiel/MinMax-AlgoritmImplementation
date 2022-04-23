@@ -13,7 +13,7 @@
         <div id="divSettings" class="panel" >
 
             <p class="panel-heading">Choose who will start</p>
-            <button id="buttonAI" type="button" class="buttonFaded" >AI</button>
+            <button id="buttonAI" type="button" class="buttonActive" >AI</button>
             <button id="buttonPlayer" type="button" class="buttonFaded">Player</button>
             <br>
             <p id="firstTurn">AI will be first</p>
@@ -21,7 +21,7 @@
 
         </div>
 
-        <div id="divGame" >
+        <div id="divGame" class="panel" hidden>
 
             <p id="playerPoints">Player points: 0</p>
             <p id="aiPoints">AI points: 0</p>
@@ -29,10 +29,12 @@
             <div id="tableDiv">
                 <table class="table" id="tableGame"></table>
             </div>
+            <p id="gameWins"></p>
+            <button id="resetGame" type="button" class="buttonHidden">Reset game</button>
 
         </div>
 
-        <div id="divDebug">
+        <div id="divDebug" hidden>
             <button id="bdelTable" type="button" class="button" >Delete Table</button>
             <button id="bstateOne" type="button" class="button" >Trigger one</button>
             <p id="stateOne">1</p>

@@ -75,6 +75,9 @@ class TreeNode {
 
 }
 
+"1"==1?console.log("yes"):console.log("no");
+
+
 
 
 /*
