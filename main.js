@@ -19,15 +19,120 @@ let textState2 = document.getElementById("stateTwo");
 let textState3 = document.getElementById("stateThree");
 let textState4 = document.getElementById("stateFour");
 
-let gameStatus = {
-    gameString : generateString(),
-    pointsAI : 0,
-    pointsPlayer : 0,
-    turnStart : "AI",
-    currentTurn : "",
-    gameStarted : false,
-    minStringSize: 3
+
+
+function randomIntFromInterval(min, max) { 
+    return Math.floor(Math.random() * (max - min + 1) + min)
+  }
+
+function generateString(){
+  let returnString =[];
+  for(let i=0;i<gameRule.stringSize;i++)
+  {
+    returnString.push(randomIntFromInterval(10,20));
+  }
+  return returnString;
 }
+
+let gameRule = {
+    gameStart : "AI",
+    minStringSize : 3,
+    stringSize :5,
+    maxPoints:25,
+    gameStarted : false
+}
+
+class numString {
+    constructor(str=generateString(),pointsAI=0,pointsPlayer=0,turn=gameRule.gameStart){
+        this.str=str;
+        this.pointsAI=pointsAI;
+        this.pointsPlayer=pointsPlayer;
+        this.turn=turn;
+
+    }
+
+    changeTurn(){
+        (this.turn=="AI")?this.turn="Player":this.turn="AI";
+    }
+    clone(){
+        return new numString(this.str,this.pointsAI,this.pointsPlayer,this.turn);
+    }
+    createChild(numIndex){
+        let moves = this.possibleMoves();
+        let child=null;
+        let temp = copyArray(this.str);
+        temp[numIndex]=processNumber(temp[numIndex]);
+        child.push(temp);
+        return child;
+    }
+
+    gameOver()
+    {
+        if(this.pointsAI>gameRule.maxPoints)
+        {
+            return "AI";
+        }
+        if(this.pointsPlayer>gameRule.maxPoints)
+        {
+            return "Player";
+        }
+        if(this.str.length<3)
+        {
+            return "END";
+        }
+        
+    }
+    gameWinner(){
+        if(this.pointsAI>this.pointsPlayer)
+            return "AI";
+        else return "Player";
+    }
+
+    possibleMoves()
+    {
+        let moves=[];
+        for(let i=0;i<this.str.length;i++){
+            if(this.str[i]%2==0)
+            {
+                moves.push(1);
+            }
+            else moves.push(0);
+        }
+        return moves;
+    }
+    processNumber(targetNumber)
+    {
+        targetNumber=parseInt(targetNumber);
+        let maxDivider = Math.round(targetNumber/2);
+        let answer = 
+        {
+            targetNumber:targetNumber,
+            maxDivider:1,
+            changed:false
+        };
+        if(targetNumber % 2 == 0)
+        {
+            answer.changed = true;
+            if(targetNumber==2)
+            {
+            answer.targetNumber=1;
+            textState2.innerHTML= answer.maxDivider +" "+answer.targetNumber;
+            return answer;
+            }
+            else
+            {
+            answer.targetNumber=targetNumber/maxDivider;
+            answer.maxDivider=maxDivider;
+            textState2.innerHTML= answer.maxDivider +" "+answer.targetNumber;
+            return answer
+            }
+        
+        }
+        else return answer;
+        }
+}
+
+let gameStatus= new numString();
 
 buttonTrOne.addEventListener("click",checkString);
 buttonDeleteTable.addEventListener("click", deleteTable);
@@ -40,24 +145,11 @@ function changeText (targetID, textString){
     document.getElementById(targetID).innerHTML = textString;
 }
 
-function randomIntFromInterval(min, max) { 
-    return Math.floor(Math.random() * (max - min + 1) + min)
-  }
-
-function generateString(){
-  let returnString =[];
-  for(let i=0;i<10;i++)
-  {
-    returnString.push(randomIntFromInterval(10,20));
-  }
-  return returnString;
-}
-
 function generateTable(targetData)
 {
     let cols = targetData.length;
     let rows =2;
-    checkString(gameStatus.gameString);
+    checkString(gameStatus.str);
     for(let i=0;i<rows;i++)
     {
         
@@ -70,7 +162,7 @@ function generateTable(targetData)
             if(i===0){cell.innerHTML=j+1;}
             else
             {
-                cell.innerHTML=gameStatus.gameString[j];
+                cell.innerHTML=gameStatus.str[j];
                 cell.setAttribute("onclick","numberOnClick(this);");
                 cell.setAttribute("place",j);
             }
@@ -80,6 +172,8 @@ function generateTable(targetData)
 function copyArray(arr){
     return JSON.parse(JSON.stringify(arr));
 }
+
+/*
 function generatePath(target){// generate all childs of parent
     let childs = [];
 
@@ -126,10 +220,9 @@ function generateTree(target){// generate tree
     console.log("minStringSize", gameStatus.minStringSize);
     addChilds(currentTarget);
     for(let i=0;i<root.value.length;i++)
-    {
-        
+    {   
 
-    /*for(let child in root.childs)
+    for(let child in root.childs)
         {
             console.log(root.childs[child], "Onroot");
         }
@@ -145,11 +238,12 @@ function generateTree(target){// generate tree
                 currentTarget=currentTarget.child;
             }
           console.log('before assignment', currentTarget.child)
-        }*/
+        }
     }
     return root;
 
 }
+*/
 
 function deleteTable(){
     let target = tableMain;
@@ -159,25 +253,25 @@ function deleteTable(){
     }
 }
 
-
 function clickedAI(){
-    gameStatus.turnStart = "AI";
+    gameRule.gameStart = "AI";
+    
     buttonAI.setAttribute("class","buttonActive");
     buttonPlayer.setAttribute("class","buttonFaded");
-    changeText("firstTurn","<strong>"+gameStatus.turnStart+"</strong> will be first")
+    changeText("firstTurn","<strong>"+gameRule.gameStart+"</strong> will be first")
 }
 
 function clickedPlayer(){
-    gameStatus.turnStart = "Player";
+    gameRule.gameStart = "Player";
     buttonAI.setAttribute("class","buttonFaded");
     buttonPlayer.setAttribute("class","buttonActive");
-    changeText("firstTurn","<strong>"+gameStatus.turnStart+"</strong> will be first")
+    changeText("firstTurn","<strong>"+gameRule.gameStart+"</strong> will be first")
 }
 
 function clickedStart(){
-    gameStatus.gameStarted = true;
+    gameRule.gameStarted = true;
     divSettings.hidden = true;
-    gameStatus.currentTurn = gameStatus.turnStart;
+    gameStatus.turn = gameRule.gameStart;
 }
 
 function processNumber(targetNumber)
@@ -207,8 +301,6 @@ function processNumber(targetNumber)
     }
       else return answer;
 }
-
-
 
 function checkString(target) {
     
@@ -264,73 +356,37 @@ function numberOnClick(target)
     let targetNumber = target.innerHTML;
  
     textState3.innerHTML = targetNumber;
+
+    if(gameStatus.turn=="Player")
+    {
     let answerDict = processNumber(targetNumber);
     //target.setAttribute("style","color:red;");
-    gameStatus.gameString[target.getAttribute("place")]=answerDict.targetNumber;
-    textState4.innerHTML = gameStatus.gameString;
+    gameStatus.str[target.getAttribute("place")]=answerDict.targetNumber;
+    textState4.innerHTML = gameStatus.str;
     target.innerHTML = answerDict.targetNumber;
     if(answerDict.maxDivider==1)
-        {   
-            checkString(gameStatus.gameString);
-            deleteTable();
-            generateTable(gameStatus.gameString);
-        }
-        changeTurn();
-}
-
-function changeTurn(){
-    gameStatus.currentTurn=="AI"?gameStatus.currentTurn="Player":gameStatus.currentTurn="AI";    
-}
-
-// minimax section
-class TreeNode {
-    constructor(value) {
-        this.value = value;
-        this.childs = [];
-        this.valLength = value.length;
+    {   
+        checkString(gameStatus.str);
+        deleteTable();
+        generateTable(gameStatus.str);
     }
-    }
-
-function minmax(node, depth, isMax){
-    if (depth==0||!("children" in node)){
-        return node.value;
-    }
-
-    let target_value;
-    let val;
-
-    if(isMax){
-        target_value = Number.NEGATIVE_INFINITY;
-
-        for(let child in node.children)
-        {
-            val = minmax(node.children[child], depth-1, false);
-            target_value = Math.min(val,target_value);
-        }
-        return target_value;
-    }
-    else
-    {
-        target_value = Number.POSITIVE_INFINITY;
-
-        for(let child in node.children)
-        {
-            val = minmax(node.children[child], depth-1, true);
-            target_value = Math.min(val,target_value);
-        }
-        return target_value;
-
+    gameStatus.changeTurn();
     }
 
 }
-// init section
-let tree=null;
+function aiProcess(){
+    let aiMove = bestMove(gameStatus);
+    let answerDict=gameStatus.processNumber(gameStatus.str[aiMove]);
+    checkString(gameStatus.str);
+    deleteTable();
+    generateTable(gameStatus.str);
+    console.log("AI choosed ",aiMove );
+    gameStatus.changeTurn();
+}
+
 function onstart()
 {
-    generateTable(gameStatus.gameString);
-    tree = generateTree(gameStatus.gameString);
-    console.log(tree);
+    generateTable(gameStatus.str);
 }
-    
 onstart();
     
