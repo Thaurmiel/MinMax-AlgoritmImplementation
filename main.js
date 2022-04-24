@@ -40,9 +40,9 @@ function generateString(){
 
 let gameRule = {
     gameStart : "AI",
-    stringSize :5,
-    minStringSize : 2,
-    
+    stringSize :8,
+    minStringSize : 3,
+    maxDepth : 3,
     maxPoints:25,
     timeOut:1000* 0.5,
     gameStarted : false
@@ -78,30 +78,68 @@ class numString {
         this.pointsAI=pointsAI;
         this.pointsPlayer=pointsPlayer;
         this.turn=turn;
-
     }
+
 
     changeTurn(){
         (this.turn=="AI")?this.turn="Player":this.turn="AI";
-        console.log("Now is",this.turn);
+        //console.log("Now is",this.turn);
     }
     clone(){
+        //console.log("Created clone with points:",this.pointsAI,this.pointsPlayer);
         return new numString(this.str,this.pointsAI,this.pointsPlayer,this.turn);
     }
     createChild(numIndex){
+        //console.log("at createChild");
+        this.changeTurn();
         let temp = copyArray(this.str);
-        temp[numIndex]=processNumber(temp[numIndex]);
+        let answer=this.processNumber(temp[numIndex]);
+        
+        temp[numIndex]=answer.targetNumber;
+        this.turn=="AI"?this.pointsAI+=answer.maxDivider:this.pointsPlayer+=answer.maxDivider;//add points to child
+        //console.log("CreateChild on turn:",this.turn);
+        let isInvalid=true;
+        for(let i=0;i<temp.length;i++)
+        {
+            if(temp[i]==1)
+            {temp.splice(i,1);}
+                
+            if(temp[i]%2==0)
+                {
+                    isInvalid = false;
+                }
+        }
+        if(isInvalid&&this.str.length>gameRule.minStringSize)
+        {
+            console.log("Invalid",temp);
+            let breakPoint = randomIntFromInterval(1,temp.length-1);
+            temp[0]+=temp[breakPoint];
+            temp.splice(breakPoint,1);
+            console.log("To:",temp);
+        }
+
         return temp;
     }
 
     gameOver()
-    {
-        
+    { 
         if(this.pointsAI>=this.pointsPlayer)
         {
             return "AI";
         }
         else return "Player"
+    }
+
+    checkEndState(bypass=false){
+        let winner=null;
+            if(this.str.length<=gameRule.minStringSize||bypass){
+                
+            this.pointsAI>this.pointsPlayer?winner="AI":winner="Player";
+            if(winner==null){
+                winner="No winner";
+            }
+        }
+        return winner;
     }
     gameWinner(){
         if(this.pointsAI>this.pointsPlayer)
@@ -229,42 +267,13 @@ function clickedStart(){
     gameRule.gameStarted = true;
     divSettings.hidden = true;
     gameStatus.turn = gameRule.gameStart;
-    console.log("First",gameStatus.turn);
+    //console.log("First",gameStatus.turn);
     divGame.hidden=false;
     
     if(gameStatus.turn=="AI")
     {
         aiCallback();
     }
-}
-
-function processNumber(targetNumber)
-{
-    targetNumber=parseInt(targetNumber);
-    let maxDivider = Math.round(targetNumber/2);
-    let answer = 
-    {
-      targetNumber:targetNumber,
-      maxDivider:1,
-      changed:false
-    };
-    if(targetNumber % 2 == 0)
-    {
-        answer.changed = true;
-        if(targetNumber==2){
-          answer.targetNumber=1;
-
-          
-          return answer;
-        }
-        else{
-        answer.targetNumber=targetNumber/maxDivider;
-        answer.maxDivider=maxDivider;
-        
-        return answer}
-    
-    }
-      else return answer;
 }
 
 function checkString(target) {
@@ -312,7 +321,7 @@ function validateString(tString, targets){
             console.log("Invalid at start",tString);
             let breakPoint = randomIntFromInterval(1,tString.length-1);
             tString[0]+=tString[breakPoint];
-            tString.splice[breakPoint,2];
+            tString.splice[breakPoint,1];
             console.log("Invalid",tString);
         }
        
@@ -334,7 +343,7 @@ function updatePoints(){
 function numberOnClick(target)
 {
     let targetNumber = target.innerHTML;
-    let answerDict = processNumber(targetNumber);
+    let answerDict = gameStatus.processNumber(targetNumber);
     if(gameStatus.turn=="Player"&&answerDict.changed==true&&gameRule.gameStarted==true)
     {
         console.log("Player got ",answerDict.maxDivider);
@@ -363,9 +372,9 @@ function aiCallback()
             checkString(gameStatus.str);
             if(gameRule.gameStarted==true)
             {
-                let aiMove = bestMove(gameStatus);
+                let aiMove = bestMove(gameStatus,gameRule.maxDepth);
                 let target= document.getElementsByName(aiMove);
-            
+                console.log(target, aiMove);
                 target[0].setAttribute("class",'chosedByAI');
                 console.log("AI choosed:", aiMove );
                 const tempo=setTimeout(function(){aiProcess(aiMove)},gameRule.timeOut);
@@ -390,6 +399,7 @@ function aiProcess(aiMove){
 function onstart()
 {
     gameStatus= new numString();
+    console.log("Start string:",gameStatus.str);
     generateTable(gameStatus.str);
     
 }
