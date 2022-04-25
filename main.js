@@ -40,7 +40,7 @@ function generateString(){
 
 let gameRule = {
     gameStart : "AI",
-    stringSize :5,
+    stringSize :8,
     minStringSize : 3,
     maxDepth : 5,
     timeOut:1000* 0.5,
