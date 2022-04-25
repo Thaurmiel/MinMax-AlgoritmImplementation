@@ -40,7 +40,7 @@ function generateString(){
 
 let gameRule = {
     gameStart : "AI",
-    stringSize :8,
+    stringSize :5,
     minStringSize : 3,
     maxDepth : 5,
     timeOut:1000* 0.5,
@@ -60,11 +60,13 @@ function resetGameState(){
     textGameWins.innerHTML = "";
     buttonReset.setAttribute("class","buttonHidden");
     updatePoints();
+    checkString(gameStatus.str);
 }
 
 function gameEnd(){
     gameRule.gameStarted = false;
     let gameEnd=gameStatus.gameOver();
+    updatePoints();
     console.log(gameEnd, "wins");
     tableMain.setAttribute("class","faded");
     
@@ -234,8 +236,6 @@ class numString {
         }
 }
 
-
-
 buttonTrOne.addEventListener("click",checkString);
 buttonDeleteTable.addEventListener("click", deleteTable);
 buttonAI.addEventListener("click", clickedAI);
@@ -249,12 +249,10 @@ function changeText (targetID, textString){
 
 function generateTable(targetData)
 {
-    
     let cols = targetData.length;
     let rows =2;
     for(let i=0;i<rows;i++)
     {
-        
         let row = document.createElement("tr");
         tableMain.appendChild(row);
         for (let j=0;j<cols;j++)
@@ -409,31 +407,38 @@ function aiCallback()
 {
         if(gameStatus.turn=="AI"&&gameRule.gameStarted==true)
         {
-            
+            checkString(gameStatus.str);
             let aiMove = bestMove(gameStatus,gameRule.maxDepth);// 5
-
             let target= document.getElementsByName(aiMove);
             console.log(target, aiMove);
             target[0].setAttribute("class",'chosedByAI');
             console.log("AI choosed:", aiMove );
             const tempo=setTimeout(function(){aiProcess(aiMove)},gameRule.timeOut);
         }
+        else{
+            gameEnd();
+        }
     
 
 }
 function aiProcess(aiMove){
     //console.log("Main aiprocess start points", gameStatus.pointsAI,gameStatus.pointsPlayer,"At turn",gameStatus.turn);
-    let answerDict=gameStatus.processNumber(gameStatus.str[aiMove]);
-    gameStatus.str[aiMove]=answerDict.targetNumber;
-    checkString(gameStatus.str);
-    deleteTable();
-    generateTable(gameStatus.str);
-    gameStatus.pointsAI+= answerDict.maxDivider;
-    updatePoints();
-    gameStatus.changeTurn();
-    if(gameStatus.str.length<=2)
+    if(gameStatus.str.length<gameRule.minStringSize)
     {
         gameEnd();
+        return;
+    }
+    if(gameStatus.turn=="AI"&&gameRule.gameStarted==true)
+    {    let answerDict=gameStatus.processNumber(gameStatus.str[aiMove]);
+        gameStatus.str[aiMove]=answerDict.targetNumber;
+        checkString(gameStatus.str);
+        deleteTable();
+        generateTable(gameStatus.str);
+        gameStatus.pointsAI+= answerDict.maxDivider;
+        updatePoints();
+        console.log("AI end, string length",gameStatus.str.length)
+
+        gameStatus.changeTurn();
     }
 }
 
